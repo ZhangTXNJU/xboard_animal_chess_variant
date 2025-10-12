@@ -1,0 +1,56 @@
+1760257829.148 POLYGLOT *** LOGFILE OPENED ***
+1760257829.148 POLYGLOT Setting PolyGlot option "LogFile=./polyglot.log"
+1760257829.148 POLYGLOT *** SWITCHING LOGFILE ***
+1760257829.148 POLYGLOT NEW LOGFILE "./polyglot.log"
+1760257829.148 POLYGLOT *** LOGFILE OPENED ***
+1760257829.148 POLYGLOT *** LOGFILE OPENED ***
+1760257829.148 PolyGlot 2.0.4 by Fabien Letouzey.
+1760257829.148 POLYGLOT *** START ***
+1760257829.148 POLYGLOT INI file "./polyglot_conf/pikafish.ini"
+1760257829.148 Adapter->Engine: uci
+1760257829.149 Engine->Adapter: !@#$% pipex_open(): ../pikafish/src: No such file or directory
+1760257829.149 POLYGLOT pipex_open(): ../pikafish/src: No such file or directory
+1760257829.149 POLYGLOT *** QUIT ***
+1760257829.371 POLYGLOT Calling exit
+1760257957.588 POLYGLOT *** LOGFILE OPENED ***
+1760257957.589 POLYGLOT Setting PolyGlot option "LogFile=./polyglot.log"
+1760257957.589 POLYGLOT *** SWITCHING LOGFILE ***
+1760257957.589 POLYGLOT NEW LOGFILE "./polyglot.log"
+1760257957.589 POLYGLOT *** LOGFILE OPENED ***
+1760257957.589 POLYGLOT *** LOGFILE OPENED ***
+1760257957.589 PolyGlot 2.0.4 by Fabien Letouzey.
+1760257957.589 POLYGLOT *** START ***
+1760257957.589 POLYGLOT INI file "./polyglot_conf/pikafish.ini"
+1760257957.589 Adapter->Engine: uci
+1760257957.589 Engine->Adapter: !@#$% pipex_open(): ../pikafish/src: No such file or directory
+1760257957.589 POLYGLOT pipex_open(): ../pikafish/src: No such file or directory
+1760257957.589 POLYGLOT *** QUIT ***
+1760257957.790 POLYGLOT Calling exit
+1760258032.695 POLYGLOT *** LOGFILE OPENED ***
+1760258032.695 POLYGLOT Setting PolyGlot option "LogFile=./polyglot.log"
+1760258032.695 POLYGLOT *** SWITCHING LOGFILE ***
+1760258032.695 POLYGLOT NEW LOGFILE "./polyglot.log"
+1760258032.695 POLYGLOT *** LOGFILE OPENED ***
+1760258032.695 POLYGLOT *** LOGFILE OPENED ***
+1760258032.695 PolyGlot 2.0.4 by Fabien Letouzey.
+1760258032.695 POLYGLOT *** START ***
+1760258032.695 POLYGLOT INI file "./polyglot_conf/pikafish.ini"
+1760258032.696 Adapter->Engine: uci
+1760258032.696 Engine->Adapter: !@#$% pipex_open(): ../pikafish/src: No such file or directory
+1760258032.696 POLYGLOT pipex_open(): ../pikafish/src: No such file or directory
+1760258032.696 POLYGLOT *** QUIT ***
+1760258032.896 POLYGLOT Calling exit
+1760261803.148 POLYGLOT *** LOGFILE OPENED ***
+1760261803.149 POLYGLOT Setting PolyGlot option "LogFile=./polyglot.log"
+1760261803.149 POLYGLOT *** SWITCHING LOGFILE ***
+1760261803.149 POLYGLOT NEW LOGFILE "./polyglot.log"
+1760261803.149 POLYGLOT *** LOGFILE OPENED ***
+1760261803.149 POLYGLOT *** LOGFILE OPENED ***
+1760261803.149 PolyGlot 2.0.4 by Fabien Letouzey.
+1760261803.149 POLYGLOT *** START ***
+1760261803.149 POLYGLOT INI file "./polyglot_conf/pikafish.ini"
+1760261803.149 Adapter->Engine: uci
+1760261803.149 Engine->Adapter: !@#$% pipex_open(): ../pikafish/src: No such file or directory
+1760261803.149 POLYGLOT pipex_open(): ../pikafish/src: No such file or directory
+1760261803.149 POLYGLOT *** QUIT ***
+1760261803.350 POLYGLOT Calling exit

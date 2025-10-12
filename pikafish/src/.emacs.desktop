@@ -1,0 +1,43 @@
+;; -*- mode: emacs-lisp; lexical-binding:t; coding: utf-8-emacs; -*-
+;; --------------------------------------------------------------------------
+;; Desktop File for Emacs
+;; --------------------------------------------------------------------------
+;; Created Mon Aug 25 13:22:26 2025
+;; Desktop file format version 208
+;; Emacs version 28.1
+
+;; Global section:
+(setq desktop-saved-frameset [frameset 1 (26795 62226 985982 706000) (desktop . "208") "zhangtx@zhangtx-virtual-machine" nil nil ((((minibuffer . t) (undecorated) (override-redirect) (font . "-DAMA-Ubuntu Mono-normal-normal-normal-*-35-*-*-*-m-0-iso10646-1") (font-parameter . "Ubuntu Mono 13") (border-width . 0) (internal-border-width . 0) (child-frame-border-width) (right-divider-width . 0) (bottom-divider-width . 0) (vertical-scroll-bars) (horizontal-scroll-bars) (foreground-color . "#eaeaea") (background-color . "#000000") (mouse-color . "black") (border-color . "#424242") (screen-gamma) (line-spacing) (left-fringe . 8) (right-fringe . 8) (no-special-glyphs) (scroll-bar-foreground . "white") (scroll-bar-background) (menu-bar-lines . 0) (tab-bar-lines . 0) (tool-bar-lines . 0) (title) (wait-for-wm . t) (tool-bar-position . top) (inhibit-double-buffering) (icon-type . t) (auto-raise) (auto-lower) (cursor-type . box) (scroll-bar-width . 32) (scroll-bar-height . 32) (alpha) (no-focus-on-map) (no-accept-focus) (fullscreen) (visibility . t) (skip-taskbar) (z-group) (display-type . color) (background-mode . dark) (cursor-color . "#d54e53") (sticky) (environment) (last-focus-update . t) (frameset--id . "2D77-3576-8E32-9F10") (frameset--mini t . t) (frameset--text-pixel-width . 1440) (frameset--text-pixel-height . 1182) (height . 32) (width . 80) (modeline . t) (unsplittable) (left . 174) (top . 38) (icon-name) (display . ":0") (explicit-name)) ((min-height . 4) (min-width . 10) (min-height-ignore . 3) (min-width-ignore . 3) (min-height-safe . 1) (min-width-safe . 2) (min-pixel-height . 144) (min-pixel-width . 180) (min-pixel-height-ignore . 74) (min-pixel-width-ignore . 52) (min-pixel-height-safe . 36) (min-pixel-width-safe . 36)) leaf (pixel-width . 1456) (pixel-height . 1110) (total-width . 80) (total-height . 30) (normal-height . 1.0) (normal-width . 1.0) (buffer "Makefile" (selected . t) (hscroll . 0) (fringes 8 8 nil nil) (margins nil) (scroll-bars nil 0 t nil 0 t nil) (vscroll . 0) (dedicated) (point . 10394) (start . 9961)) (prev-buffers ("*scratch*" 1 43))))])
+(setq comint-input-ring nil)
+(setq compile-history nil)
+(setq desktop-missing-file-warning nil)
+(setq dired-regexp-history nil)
+(setq extended-command-history '("occur"))
+(setq face-name-history nil)
+(setq file-name-history '("~/pikafish/Pikafish/src/" "~/pikafish/Pikafish/src/Makefile" "~/.emacs.d/custom.el" "~/pikafish/Pikafish/src/" "~/pikafish/Pikafish/src/Makefile" "~/.emacs.d/custom.el" "~/pikafish/Pikafish/src/" "~/pikafish/Pikafish/src/Makefile" "~/.emacs.d/custom.el" "~/pikafish/Pikafish/src/" "~/pikafish/Pikafish/src/bitboard.h" "~/.emacs.d/custom.el" "~/pikafish/Pikafish/src/Makefile" "~/.emacs.d/custom.el" "~/Lab/src/Main.java" "~/Lab/Makefile" "~/Compiler/Lab/Makefile" "~/note/note/编译原理/lab-doc" "~/note/open_internet" "~/.emacs.d/.github/workflows/test.yml" "~/Lab/src/CodeFormatter.java" "~/Lab/src/SysYParser.java" "~/Lab/src/SysYParserBaseVisitor.java" "~/Lab/src/SysYParser.interp" "~/Lab/src/SysYLexer.g4" "~/Lab/docs/design.md" "~/Lab/src/IRGenerator.java" "/usr/share/emacs/28.1/etc/HELLO" "~/云原生/minikube_start.sh" "~/云原生/docker_study/ex2.1/index.html" "~/云原生/ex2.1/Dockerfile" "~/.zshrc" "~/云原生/ex2.1/2048-master/index.html" "~/云原生/homework2/k8s/mysql-pv.yaml" "~/云原生/homework2/k8s/mysql-deployment.yaml" "~/云原生/homework2/k8s/eureka-deployment.yaml" "~/云原生/homework2/k8s/admin-deployment.yaml" "~/云原生/homework2/k8s/user-deployment.yaml" "~/云原生/install_docker.sh" "/etc/docker/daemon.json" "/etc/resolv.conf" "~/todo_list.md" "~/.m2/settings.xml" "~/.emacs.d/custom.el" "~/Lab/src/Main.java" "~/Lab/Makefile" "~/Compiler/Lab/Makefile" "~/note/note/编译原理/lab-doc" "~/note/open_internet" "~/.emacs.d/.github/workflows/test.yml" "~/Lab/src/CodeFormatter.java" "~/Lab/src/SysYParser.java" "~/Lab/src/SysYParserBaseVisitor.java" "~/Lab/src/SysYParser.interp" "~/Lab/src/SysYLexer.g4" "~/Lab/docs/design.md" "~/Lab/src/IRGenerator.java" "/usr/share/emacs/28.1/etc/HELLO" "~/云原生/minikube_start.sh" "~/云原生/docker_study/ex2.1/index.html" "~/云原生/ex2.1/Dockerfile" "~/.zshrc" "~/云原生/ex2.1/2048-master/index.html" "~/云原生/homework2/k8s/mysql-pv.yaml" "~/云原生/homework2/k8s/mysql-deployment.yaml" "~/云原生/homework2/k8s/eureka-deployment.yaml" "~/云原生/homework2/k8s/admin-deployment.yaml" "~/云原生/homework2/k8s/user-deployment.yaml" "~/.m2/settings.xml" "~/云原生/install_docker.sh" "/etc/docker/daemon.json" "/etc/resolv.conf" "~/todo_list.md" "~/.emacs.d/custom.el" "~/Lab/src/Main.java" "~/Lab/Makefile" "~/Compiler/Lab/Makefile" "~/note/note/编译原理/lab-doc" "~/note/open_internet" "~/.emacs.d/.github/workflows/test.yml" "~/Lab/src/CodeFormatter.java" "~/Lab/src/SysYParser.java" "~/Lab/src/SysYParserBaseVisitor.java" "~/Lab/src/SysYParser.interp" "~/Lab/src/SysYLexer.g4" "~/Lab/docs/design.md" "~/Lab/src/IRGenerator.java" "/usr/share/emacs/28.1/etc/HELLO" "~/云原生/minikube_start.sh" "~/云原生/docker_study/ex2.1/index.html" "~/云原生/ex2.1/Dockerfile" "~/.zshrc" "~/todo_list.md" "~/云原生/ex2.1/2048-master/index.html" "~/云原生/homework2/k8s/mysql-pv.yaml" "~/云原生/homework2/k8s/mysql-deployment.yaml" "~/云原生/homework2/k8s/eureka-deployment.yaml" "~/云原生/homework2/k8s/admin-deployment.yaml" "~/云原生/homework2/k8s/user-deployment.yaml" "~/.m2/settings.xml"))
+(setq grep-find-history nil)
+(setq grep-history nil)
+(setq minibuffer-history nil)
+(setq query-replace-history nil)
+(setq read-expression-history nil)
+(setq regexp-history '("build" "buildLoad"))
+(setq regexp-search-ring nil)
+(setq register-alist nil)
+(setq search-ring '(#("buildLoad" 0 9 (isearch-case-fold-search nil isearch-regexp-function nil)) #("builder.buildLoad" 0 17 (isearch-case-fold-search nil isearch-regexp-function nil)) #("builder.build" 0 13 (isearch-case-fold-search nil isearch-regexp-function nil)) #("AssignExp" 0 9 (isearch-case-fold-search nil isearch-regexp-function nil)) #("ReturnStmt" 0 10 (isearch-case-fold-search nil isearch-regexp-function nil))))
+(setq shell-command-history nil)
+(setq tags-file-name nil)
+(setq tags-table-list nil)
+
+;; Buffer section -- buffers listed in same order as in buffer list:
+(desktop-create-buffer 208
+  "/home/zhangtx/pikafish/Pikafish/src/Makefile"
+  "Makefile"
+  'makefile-gmake-mode
+  '(eldoc-mode immortal-scratch-mode auto-compile-on-load-mode projectile-mode diff-hl-mode whitespace-cleanup-mode which-key-mode hes-mode whole-line-or-region-local-mode global-auto-revert-mode anzu-mode dimmer-mode gcmh-mode goto-address-prog-mode symbol-overlay-mode rainbow-delimiters-mode flymake-mode)
+  10394
+  '(10393 t)
+  nil
+  nil
+  '((show-trailing-whitespace . t) (indent-tabs-mode . t) (buffer-display-time 26795 62224 742394 152000) (buffer-file-coding-system . utf-8-unix) (overwrite-mode))
+  '((mark-ring (10366 10366 10409 10366 10365 10393))))
+

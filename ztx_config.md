@@ -59,7 +59,12 @@ sudo make install 安装棋子图像等资源
 
 ## variant编写。
 
+首先需要安装象棋的引擎
+安装eleeye引擎（手动编译）
 
+sudo apt install git build-essential
+git clone https://github.com/xqbase/eleeye.git
+cd eleeye/src
 
 
 
