@@ -887,7 +887,10 @@ main (int argc, char **argv)
 	exit(0);
     }
 
+//上面都是些初始化相关的
+
     /* set up GTK */
+	//ztx:gtk_init:初始化gtk，设置gtk窗口环境
     gtk_init (&argc, &argv);
 #ifdef OSXAPP
     {   // prepare to catch OX OpenFile signal, which will tell us the clicked file
@@ -1288,6 +1291,7 @@ main (int argc, char **argv)
 
     /* check for GTK events and process them */
 //    gtk_main();
+	//ztx:这里进入事件循环
 while(1) {
 gtk_main_iteration();
 }
