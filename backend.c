@@ -620,6 +620,14 @@ ChessSquare XiangqiArray[2][BOARD_FILES] = {
         BlackWazir, BlackFerz, BlackAlfil, BlackKnight, BlackRook }
 };
 
+ChessSquare JungleArray[2][BOARD_FILES] = {
+	{ WhiteLion, EmptySquare, EmptySquare, EmptySquare, EmptySquare, EmptySquare, WhiteRook },
+	{ BlackRook, EmptySquare, EmptySquare, EmptySquare, EmptySquare, EmptySquare, BlackLion }
+};
+//根据自定义的棋子映射规则写的。这个数组在初始化时作为黑白双方最后一排的棋子
+//自定义规则中tiger对应Rook,Lion就对应Lion(因为本来就有名为Lion的棋子类型)
+//没有修改原本的棋子类型枚举类
+
 ChessSquare CapablancaArray[2][BOARD_FILES] = {
     { WhiteRook, WhiteKnight, WhiteAngel, WhiteBishop, WhiteQueen,
         WhiteKing, WhiteBishop, WhiteMarshall, WhiteKnight, WhiteRook },
@@ -2109,7 +2117,7 @@ VariantName (VariantClass v)
     return variantNames[v];
 }
 
-
+//这里也需要更改，传入字符串的jungle解析为VariantJungle
 /* Identify a variant from the strings the chess servers use or the
    PGN Variant tag names we use. */
 VariantClass
@@ -6038,7 +6046,9 @@ ptclen (const char *s, char *escapes)
     while(*s) n += (*s != '/' && *s != '-' && *s != '^' && *s != '*' && !strchr(escapes, *s)) - 2*(*s == '='), s++;
     return n;
 }
-
+/*给字符串的长度除以2，前n个字符对应chessSquare enum从位置0开始的n个棋子类型，
+ *前半部分最后一个对应king 类型后n个字符一一对应从第一个black棋子开始位置的n个棋子类型，最后一个对应blackKing,
+ */
 int
 SetCharTableEsc (unsigned char *table, const char * map, char * escapes)
 /* [HGM] moved here from winboard.c because of its general usefulness */
@@ -6268,6 +6278,18 @@ InitPosition (int redraw)
       nrCastlingRights = 0;
       SetCharTable(pieceToChar, "PH.R.AE..K.C.ph.r.ae..k.c.");
       break;
+
+    	case VariantJungle:
+    		pieces = JungleArray;
+    		gameInfo.boardWidth  = 7;
+    		gameInfo.boardHeight = 9;
+    		nrCastlingRights = 0;
+    		SetCharTable(pieceToChar, "R.PTE............D....L....W...............CKr.pte............d....l....w...............ck");
+    		//上面传入的字符串长度必须是偶数
+    		//上面字符串的含义：前后两部分，分别表示白旗和黑棋。前半部分按顺序与从0位开始的enum对应。
+    		//初始化逻辑还有缺陷：后面还需要增加初始化其他位置的逻辑
+    		break;
+
     case VariantShogi:
       pieces = ShogiArray;
       gameInfo.boardWidth  = 9;

@@ -287,6 +287,7 @@ typedef enum {
     IcsExamining
   } GameMode;
 
+//ztx:棋子类型枚举类，应该不需要再增加棋子类型了（缺少的棋子类型直接映射到别的棋子就可以，比如把dophin当成tiger之类的）
 typedef enum {
     /* [HGM] the order here is crucial for Crazyhouse & Shogi: */
     /* only the first N pieces can go into the holdings, and   */
@@ -364,6 +365,7 @@ typedef enum {
     SoundIcsDraw, SoundIcsUnfinished, NSoundClasses
 } SoundClass;
 
+//variant的定义在这里，顺序有意义，与variant名称一一对应
 /* Names for chess variants, not necessarily supported */
 typedef enum {
     VariantNormal,       /* Normal chess */
@@ -409,6 +411,7 @@ typedef enum {
     VariantGrand,
     VariantSpartan,
     VariantXiangqi,
+    VariantJungle,
     VariantASEAN,
     VariantLion,
     VariantChuChess,
@@ -459,6 +462,7 @@ typedef enum {
   "grand",\
   "spartan",\
   "xiangqi", \
+  "jungle", \
   "asean",\
   "lion",\
   "elven",\
