@@ -6289,6 +6289,45 @@ InitPosition (int redraw)
     		//上面传入的字符串长度必须是偶数
     		//上面字符串的含义：前后两部分，分别表示白旗和黑棋。前半部分按顺序与从0位开始的enum对应。
     		//初始化逻辑还有缺陷：后面还需要增加初始化其他位置的逻辑
+
+    		// 手动初始化整个棋盘
+    		// 先清空所有位置
+    		for(i=0; i<BOARD_HEIGHT; i++)
+    			for(j=0; j<BOARD_WIDTH; j++)
+    				initialPosition[i][j] = EmptySquare;
+
+    		// 白方（底部，行0-2）
+    		// 行0: t . # 穴 # . l
+    		initialPosition[0][0] = WhiteRook;    // 虎 (T)
+    		initialPosition[0][6] = WhiteLion;    // 狮 (L)
+    		// 位置1,2,3,4,5是特殊格子（陷阱和兽穴），暂时留空
+
+    		// 行1: . c . # . d .
+    		initialPosition[1][1] = WhiteCat;     // 猫 (C)
+    		initialPosition[1][5] = WhiteFalcon;  // 狗 (D)
+
+    		// 行2: e . w . p . r
+    		initialPosition[2][0] = WhiteQueen;   // 象 (E)
+    		initialPosition[2][2] = WhiteWolf;    // 狼 (W)
+    		initialPosition[2][4] = WhiteBishop;  // 豹 (P)
+    		initialPosition[2][6] = WhitePawn;    // 鼠 (R)
+
+    		// 行3-5：河流区域（~），留空
+
+    		// 黑方（顶部，行6-8）
+    		// 行6: R . P . W . E
+    		initialPosition[6][0] = BlackPawn;    // 鼠 (R)
+    		initialPosition[6][2] = BlackBishop;  // 豹 (P)
+    		initialPosition[6][4] = BlackWolf;    // 狼 (W)
+    		initialPosition[6][6] = BlackQueen;   // 象 (E)
+
+    		// 行7: . D . # . C .
+    		initialPosition[7][1] = BlackFalcon;  // 狗 (D)
+    		initialPosition[7][5] = BlackCat;     // 猫 (C)
+
+    		// 行8: L . # 穴 # . T
+    		initialPosition[8][0] = BlackLion;    // 狮 (L)
+    		initialPosition[8][6] = BlackRook;    // 虎 (T)
     		break;
 
     case VariantShogi:
@@ -6395,44 +6434,47 @@ InitPosition (int redraw)
     if(appData.pieceToCharTable != NULL)
         SetCharTableEsc(pieceToChar, appData.pieceToCharTable, SUFFIXES);
 
-    for( j=0; j<BOARD_WIDTH; j++ ) { ChessSquare s = EmptySquare;
+	if(gameInfo.variant != VariantJungle) {
+		//跳过通用的初始化逻辑
+		for( j=0; j<BOARD_WIDTH; j++ ) { ChessSquare s = EmptySquare;
 
-        if(j==BOARD_LEFT-1 || j==BOARD_RGHT)
-            s = (ChessSquare) 0; /* account holding counts in guard band */
-        for( i=0; i<BOARD_HEIGHT; i++ )
-            initialPosition[i][j] = s;
+			if(j==BOARD_LEFT-1 || j==BOARD_RGHT)
+				s = (ChessSquare) 0; /* account holding counts in guard band */
+			for( i=0; i<BOARD_HEIGHT; i++ )
+				initialPosition[i][j] = s;
 
-        if(j < BOARD_LEFT || j >= BOARD_RGHT || overrule) continue;
-        initialPosition[gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess][j] = pieces[0][j-gameInfo.holdingsWidth];
-        initialPosition[pawnRow][j] = WhitePawn;
-        initialPosition[BOARD_HEIGHT-pawnRow-1][j] = gameInfo.variant == VariantSpartan ? BlackLance : BlackPawn;
-        if(gameInfo.variant == VariantXiangqi) {
-            if(j&1) {
-                initialPosition[pawnRow][j] =
-                initialPosition[BOARD_HEIGHT-pawnRow-1][j] = EmptySquare;
-                if(j==BOARD_LEFT+1 || j>=BOARD_RGHT-2) {
-                   initialPosition[2][j] = WhiteCannon;
-                   initialPosition[BOARD_HEIGHT-3][j] = BlackCannon;
-                }
-            }
-        }
-        if(gameInfo.variant == VariantChu) {
-             if(j == (BOARD_WIDTH-2)/3 || j == BOARD_WIDTH - (BOARD_WIDTH+1)/3)
-               initialPosition[pawnRow+1][j] = WhiteCobra,
-               initialPosition[BOARD_HEIGHT-pawnRow-2][j] = BlackCobra;
-             for(i=1; i<pieceRows; i++) {
-               initialPosition[i][j] = pieces[2*i][j-gameInfo.holdingsWidth];
-               initialPosition[BOARD_HEIGHT-1-i][j] =  pieces[2*i+1][j-gameInfo.holdingsWidth];
-             }
-        }
-        if(gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess) {
-            if(j==BOARD_LEFT || j>=BOARD_RGHT-1) {
-               initialPosition[0][j] = WhiteRook;
-               initialPosition[BOARD_HEIGHT-1][j] = BlackRook;
-            }
-        }
-        initialPosition[BOARD_HEIGHT-1-(gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess)][j] =  pieces[1][j-gameInfo.holdingsWidth];
-    }
+			if(j < BOARD_LEFT || j >= BOARD_RGHT || overrule) continue;
+			initialPosition[gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess][j] = pieces[0][j-gameInfo.holdingsWidth];
+			initialPosition[pawnRow][j] = WhitePawn;
+			initialPosition[BOARD_HEIGHT-pawnRow-1][j] = gameInfo.variant == VariantSpartan ? BlackLance : BlackPawn;
+			if(gameInfo.variant == VariantXiangqi) {
+				if(j&1) {
+					initialPosition[pawnRow][j] =
+					initialPosition[BOARD_HEIGHT-pawnRow-1][j] = EmptySquare;
+					if(j==BOARD_LEFT+1 || j>=BOARD_RGHT-2) {
+						initialPosition[2][j] = WhiteCannon;
+						initialPosition[BOARD_HEIGHT-3][j] = BlackCannon;
+					}
+				}
+			}
+			if(gameInfo.variant == VariantChu) {
+				if(j == (BOARD_WIDTH-2)/3 || j == BOARD_WIDTH - (BOARD_WIDTH+1)/3)
+					initialPosition[pawnRow+1][j] = WhiteCobra,
+					initialPosition[BOARD_HEIGHT-pawnRow-2][j] = BlackCobra;
+				for(i=1; i<pieceRows; i++) {
+					initialPosition[i][j] = pieces[2*i][j-gameInfo.holdingsWidth];
+					initialPosition[BOARD_HEIGHT-1-i][j] =  pieces[2*i+1][j-gameInfo.holdingsWidth];
+				}
+			}
+			if(gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess) {
+				if(j==BOARD_LEFT || j>=BOARD_RGHT-1) {
+					initialPosition[0][j] = WhiteRook;
+					initialPosition[BOARD_HEIGHT-1][j] = BlackRook;
+				}
+			}
+			initialPosition[BOARD_HEIGHT-1-(gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess)][j] =  pieces[1][j-gameInfo.holdingsWidth];
+		}
+	}//if语句结束，因为这段代码逻辑是清空除了最后两排的其他位置，并放置兵行，对斗兽棋而言已经在switch语句初始化了所有位置，因此需要跳过这部分代码
     if(gameInfo.variant == VariantChuChess) initialPosition[0][BOARD_WIDTH/2] = WhiteKing, initialPosition[BOARD_HEIGHT-1][BOARD_WIDTH/2-1] = BlackKing;
     if( (gameInfo.variant == VariantShogi) && !overrule ) {
 
