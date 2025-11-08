@@ -88,3 +88,33 @@ R → WhitePawn
 目前需要完成能够让xboard以jungle 的variant启动的上层部分
 包括parser解析参数，能够让xboard选择variant斗兽棋
 
+
+图片设置--不需要修改代码，只需要加配置文件和图片资源
+char *pngPieceNames[] = // must be in same order as internal piece encoding
+{ "Pawn", "Knight", "Bishop", "Rook", "Queen", "Advisor", "Elephant", "Archbishop", "Marshall", "Gold", "Commoner",
+"Canon", "Nightrider", "CrownedBishop", "CrownedRook", "Crown", "Chancellor", "Hawk", "Lance", "Cobra", "Unicorn", "Lion",
+"Sword", "Zebra", "Camel", "Tower", "Wolf", "Hat", "Duck", "Lance", "Dragon", "Gnu", "Cub",
+"LShield", "Pegasus", "Wizard", "Copper", "Iron", "Viking", "Flag", "Axe", "Dolphin", "Leopard", "Claw",
+"Left", "Butterfly", "PromoBishop", "PromoRook", "HCrown", "RShield", "Prince", "Phoenix", "Kylin", "Drunk", "Right",
+"GoldPawn", "GoldKnight", "PromoHorse", "PromoDragon", "GoldLance", "GoldSilver", "HSword", "PromoSword", "PromoHSword", "Princess", "King",
+NULL
+};
+上面这个定义是draw.c中的，用于与chessSquare进行一一映射，每个ChessSquare类型对应一个字符串，图片命名方式需要按照上面的名称来
+White/Black + name.svg为名称即可
+themes/jungle/
+├── WhiteQueen.svg      # 白象 (E)
+├── BlackQueen.svg      # 黑象
+├── WhiteLion.svg       # 白狮 (L)
+├── BlackLion.svg       # 黑狮
+├── WhiteRook.svg       # 白虎 (T)
+├── BlackRook.svg       # 黑虎
+├── WhiteBishop.svg     # 白豹 (P)
+├── BlackBishop.svg     # 黑豹
+├── WhiteWolf.svg       # 白狼 (W)
+├── BlackWolf.svg       # 黑狼
+├── WhiteHawk.svg       # 白狗 (D) - 注意是Hawk不是Falcon!
+├── BlackHawk.svg       # 黑狗
+├── WhiteLeopard.svg    # 白猫 (C) - 注意是Leopard不是Cat!
+├── BlackLeopard.svg    # 黑猫
+├── WhitePawn.svg       # 白鼠 (R)
+└── BlackPawn.svg       # 黑鼠

@@ -1,0 +1,28 @@
+;
+; settings for Jungle Chess (斗兽棋) theme
+;
+-variant jungle
+;
+; pieces: jungle chess svg's
+;
+-pid ~~/themes/jungle
+-trueColors true
+;
+; board: you can customize board texture here
+;
+; -liteBackTextureFile  "~~/themes/textures/jungleboard.png"
+; -darkBackTextureFile  "~~/themes/textures/jungleboard.png"
+;
+; board colors (if not using texture)
+;
+-lsc #90EE90
+-dsc #228B22
+;
+; highlight colors
+;
+-hsc #ffff00
+-phc #ff0000
+;
+; line gap
+;
+-overrideLineGap 1

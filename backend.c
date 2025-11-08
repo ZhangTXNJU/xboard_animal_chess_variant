@@ -1220,6 +1220,7 @@ InitBackEnd1 ()
 	  return;
 	}
       case VariantXiangqi:    /* [HGM] repetition rules not implemented */
+      	case VariantJungle: //增加斗兽棋的case，如果没有这个会出一个xboard: 未知变量名 jungle的	报错信息，虽然这个报错似乎也不影响使用
       case VariantFairy:      /* [HGM] TestLegality definitely off! */
       case VariantGothic:     /* [HGM] should work */
       case VariantCapablanca: /* [HGM] should work */
