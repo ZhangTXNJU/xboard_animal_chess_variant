@@ -6281,7 +6281,7 @@ InitPosition (int redraw)
       break;
 
     	case VariantJungle:
-    		pieces = JungleArray;
+    		//pieces = JungleArray;
     		gameInfo.boardWidth  = 7;
     		gameInfo.boardHeight = 9;
     		nrCastlingRights = 0;
@@ -6328,6 +6328,7 @@ InitPosition (int redraw)
     		// 行8: L . # 穴 # . T
     		initialPosition[8][0] = BlackLion;    // 狮 (L)
     		initialPosition[8][6] = BlackRook;    // 虎 (T)
+
     		break;
 
     case VariantShogi:

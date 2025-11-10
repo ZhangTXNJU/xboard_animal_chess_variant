@@ -112,9 +112,97 @@ themes/jungle/
 ├── BlackBishop.svg     # 黑豹
 ├── WhiteWolf.svg       # 白狼 (W)
 ├── BlackWolf.svg       # 黑狼
-├── WhiteHawk.svg       # 白狗 (D) - 注意是Hawk不是Falcon!
+├── WhiteHawk.svg       # 白狗 (D) - 注意是Hawk不是Falcon
 ├── BlackHawk.svg       # 黑狗
-├── WhiteLeopard.svg    # 白猫 (C) - 注意是Leopard不是Cat!
+├── WhiteLeopard.svg    # 白猫 (C) - 注意是Leopard不是Cat
 ├── BlackLeopard.svg    # 黑猫
 ├── WhitePawn.svg       # 白鼠 (R)
 └── BlackPawn.svg       # 黑鼠
+
+## 走棋逻辑部分开发流程
+
+jungle基础上新建分支jungle_moves
+主要文件：moves
+
+feat: 实现斗兽棋(Jungle)基本走棋功能
+
+## 功能概述
+在XBoard基础上实现斗兽棋变体，支持基本走棋和吃子功能。
+
+## 主要修改
+
+### 1. 变体定义 (common.h)
+- 添加 VariantJungle 枚举
+- 支持 -variant jungle 命令行参数
+
+### 2. 棋盘初始化 (backend.c)
+- 实现7x9棋盘布局
+- 定义8种棋子的起始位置
+- 建立棋子与字符的映射关系
+    * 鼠(R) → WhitePawn/BlackPawn
+    * 猫(C) → WhiteCat/BlackCat
+    * 狗(D) → WhiteFalcon/BlackFalcon
+    * 狼(W) → WhiteWolf/BlackWolf
+    * 豹(P) → WhiteBishop/BlackBishop
+    * 虎(T) → WhiteRook/BlackRook
+    * 狮(L) → WhiteLion/BlackLion
+    * 象(E) → WhiteQueen/BlackQueen
+
+### 3. 走法生成 (moves.c)
+- 修复CheckTest：支持无King变体（关键修复）
+- 实现所有8种棋子的基本走法（4方向1格）
+- 复用Wazir函数实现正交4方向移动
+- 支持基本吃子功能
+
+### 关键修复
+
+// moves.c CheckTest函数
+if(gameInfo.variant == VariantJungle) {
+    return 0;  // 斗兽棋没有King，跳过将军检查
+}
+
+
+### 走法实现
+所有棋子都使用Wazir函数（正交4方向1格）：
+```c
+case WhitePawn:  // 鼠
+    if(gameInfo.variant == VariantJungle) {
+        Wazir(board, flags, rf, ff, callback, closure);
+        break;
+    }
+```
+
+## 测试验证
+
+已测试功能：
+- ✅ 棋盘正确显示（7x9）
+- ✅ 棋子正确显示和移动
+- ✅ 点击棋子高亮可走位置
+- ✅ 所有棋子可以走4个方向
+- ✅ 可以吃敌方棋子
+- ✅ 不能吃己方棋子
+- ✅ 边界检查正常
+
+## 待实现功能
+
+特殊规则（下一阶段）：
+- [ ] 大吃小规则
+- [ ] 鼠象互吃规则
+- [ ] 河流限制（非鼠不能进入）
+- [ ] 跳河功能（虎、狮）
+- [ ] 陷阱规则
+- [ ] 兽穴规则（胜利条件）
+
+
+启动：
+```bash
+./xboard -variant jungle -ncp
+```
+这一阶段修改的内容：
+moves.c中的GenPseudoLegal函数中的switch语句中增加各种棋子在variant == VariantJungle情况下的走棋逻辑
+初步全部设置为上下左右走一格的走法。
+
+
+moves.c中的CheckTest 函数，取消斗兽棋对于将军的判断（如果没有这部分无法走棋，因为默认似乎是被将军状态）
+增加了一个if语句判断是不是jungle，如果是直接return 0
+

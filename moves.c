@@ -713,6 +713,17 @@ Wazir (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR c
   StepSideways(board, flags, rf, ff, callback, closure);
 }
 
+// void
+// Wazir (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure)
+// {
+// 	printf("DEBUG: Wazir called from (%d,%d)\n", rf, ff);
+// 	fflush(stdout);
+// 	StepVertical(board, flags, rf, ff, callback, closure);
+// 	StepSideways(board, flags, rf, ff, callback, closure);
+// 	printf("DEBUG: Wazir done\n");
+// 	fflush(stdout);
+// }
+
 void
 Knight (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure)
 {
@@ -767,9 +778,20 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
             /* case EmptySquare: [HGM] this is nonsense, and conflicts with Shogi cases */
 	    default:
 	      /* can't happen ([HGM] except for faries...) */
+          		// 斗兽棋：猫(C)和狼(W)走4个正交方向1格
+          		if(gameInfo.variant == VariantJungle &&
+					 (piece == WhiteCat || piece == BlackCat ||
+					  piece == WhiteWolf || piece == BlackWolf)) {
+          			Wazir(board, flags, rf, ff, callback, closure);
+					  }
 	      break;
 
-             case WhitePawn:
+             case WhitePawn://斗兽棋rat走法，上下左右
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：鼠(R)走4个正交方向1格 */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			break;
+          		}
               if(gameInfo.variant == VariantXiangqi) {
                   /* [HGM] capture and move straight ahead in Xiangqi */
                   if (rf < BOARD_HEIGHT-1 &&
@@ -821,6 +843,12 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 	      break;
 
 	    case BlackPawn:
+          		//moves:增加斗兽棋的老鼠的走法
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：鼠(R)走4个正交方向1格 */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			break;
+          		}
               if(gameInfo.variant == VariantXiangqi) {
                   /* [HGM] capture straight ahead in Xiangqi */
                   if (rf > 0 && !SameColor(board[rf][ff], board[rf - 1][ff]) ) {
@@ -1080,6 +1108,13 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
             case SHOGI BlackPBishop:
 	    case WhiteBishop:
 	    case BlackBishop:
+
+          		if(gameInfo.variant == VariantJungle) {
+          			//豹子走法：基础的上下左右
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			break;
+          		}
+
 		Bishop(board, flags, rf, ff, callback, closure);
 		break;
 
@@ -1167,11 +1202,24 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
             case SHOGI BlackPRook:
 	    case WhiteRook:
 	    case BlackRook:
+          		//jungle tiger 还需要增加跳河，吃子等逻辑
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：虎(T)走4个正交方向1格 + 跳河（TODO） */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			// TODO: 添加跳河逻辑
+          			break;
+          		}
+
 		Rook(board, flags, rf, ff, callback, closure);
 		break;
 
 	    case WhiteQueen:
 	    case BlackQueen:
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：象(E)走4个正交方向1格 */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			break;
+          		}
             case SHOGI WhiteMother:
             case SHOGI BlackMother:
 	    doQueen:
@@ -1288,6 +1336,15 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
             case SHOGI BlackLion:
             case WhiteLion:
             case BlackLion:
+
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：狮(L)走4个正交方向1格 + 跳河（TODO） */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			// TODO: 添加跳河逻辑
+          			break;
+          		}
+
+
               for(rt = rf - 2; rt <= rf + 2; rt++) for(ft = ff - 2; ft <= ff + 2; ft++) {
                 if (rt < 0 || rt >= BOARD_HEIGHT || ft < BOARD_LEFT || ft >= BOARD_RGHT) continue;
                 if (!(ff == ft && rf == rt) && SameColor(board[rf][ff], board[rt][ft])) continue;
@@ -1409,6 +1466,13 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 
 	    case WhiteFalcon: // [HGM] wild: for wildcards, self-capture symbolizes move to anywhere
 	    case BlackFalcon:
+          		if(gameInfo.variant == VariantJungle) {
+          			/* 斗兽棋：狗(D)走4个正交方向1格 */
+          			Wazir(board, flags, rf, ff, callback, closure);
+          			break;
+          		}
+          		callback(board, flags, NormalMove, rf, ff, rf, ff, closure);
+          		break;
 	    case WhiteCobra:
 	    case BlackCobra:
 	      callback(board, flags, NormalMove, rf, ff, rf, ff, closure);
@@ -1720,6 +1784,12 @@ CheckTest (Board board, int flags, int rf, int ff, int rt, int ft, int enPassant
     int saveKill = killX;
     /*  Suppress warnings on uninitialized variables    */
 
+	if(gameInfo.variant == VariantJungle) {
+		//printf("DEBUG: CheckTest - Jungle variant, no check concept, returning 0\n");
+		fflush(stdout);
+		return 0;
+	}
+	//斗兽棋没有将军的概念
     if(gameInfo.variant == VariantXiangqi)
         king = flags & F_WHITE_ON_MOVE ? WhiteWazir : BlackWazir;
     if(gameInfo.variant == VariantKnightmate)
