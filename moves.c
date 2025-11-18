@@ -791,6 +791,7 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
           			/* 斗兽棋：鼠(R)走4个正交方向1格 */
           			Wazir(board, flags, rf, ff, callback, closure);
           			break;
+
           		}
               if(gameInfo.variant == VariantXiangqi) {
                   /* [HGM] capture and move straight ahead in Xiangqi */
