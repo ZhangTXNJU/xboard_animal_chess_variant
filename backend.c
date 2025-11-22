@@ -10733,6 +10733,30 @@ MakeMove (int fromX, int fromY, int toX, int toY, int promoChar)
     }
     CopyBoard(boards[forwardMostMove+1], boards[forwardMostMove]);
     ApplyMove(fromX, fromY, toX, toY, promoChar, boards[forwardMostMove+1]);
+
+	// // 斗兽棋：检查是否进入兽穴,如果进入兽穴就分出胜负
+	// if(gameInfo.variant == VariantJungle) {
+	// 	ChessSquare piece = boards[forwardMostMove+1][toY][toX];
+	//
+	// 	// 白方兽穴在 (0, 3) - 第1行第4列
+	// 	if(toY == 0 && toX == 3) {
+	// 		// 黑方棋子进入白方兽穴
+	// 		if(piece >= BlackPawn && piece < EmptySquare) {
+	// 			GameEnds(BlackWins, "Black enters white's den", GE_XBOARD);
+	//
+	// 		}
+	// 	}
+	//
+	// 	// 黑方兽穴在 (8, 3) - 第9行第4列
+	// 	if(toY == 8 && toX == 3) {
+	// 		// 白方棋子进入黑方兽穴
+	// 		if(piece >= WhitePawn && piece < BlackPawn) {
+	// 			GameEnds(WhiteWins, "White enters black's den", GE_XBOARD);
+	//
+	// 		}
+	// 	}
+	// }
+
     // forwardMostMove++; // [HGM] bare: moved to after ApplyMove, to make sure clock interrupt finds complete board
     SwitchClocks(forwardMostMove+1); // [HGM] race: incrementing move nr inside
     timeRemaining[0][forwardMostMove] = whiteTimeRemaining;
@@ -10758,6 +10782,55 @@ MakeMove (int fromX, int fromY, int toX, int toY, int promoChar)
       case MT_STAINMATE:
 	strcat(parseList[forwardMostMove - 1], "#");
 	break;
+    }
+
+	 // 斗兽棋：检查是否进入兽穴（简化版本）
+    if(gameInfo.variant == VariantJungle) {
+        ChessSquare piece = boards[forwardMostMove][toY][toX];
+        if(appData.debugMode) {
+            fprintf(debugFP, "DEBUG: Jungle check - toX=%d, toY=%d, gameMode=%d\n",
+                    toX, toY, gameMode);
+            fprintf(debugFP, "DEBUG: Piece at destination = %d\n", piece);
+            fprintf(debugFP, "DEBUG: WhiteOnMove(forwardMostMove-1) = %d\n",
+                    WhiteOnMove(forwardMostMove-1));
+        }
+        // 检查黑方兽穴 (8, 3) - d9
+        if(toY == 8 && toX == 3 && piece != EmptySquare) {
+            if(appData.debugMode) {
+                fprintf(debugFP, "DEBUG: Someone entered black's den!\n");
+                fprintf(debugFP, "DEBUG: gameMode before GameEnds = %d\n", gameMode);
+            }
+            // 简化判断：看谁刚才走的棋
+            if(WhiteOnMove(forwardMostMove-1)) {
+                // 白方刚走完，所以是白方进入
+                if(appData.debugMode) {
+                    fprintf(debugFP, "DEBUG: WHITE WINS! Calling GameEnds\n");
+                }
+                DisplayInformation("WHITE WINS: Enters black's den!");
+                GameEnds(WhiteWins, "White enters black's den", GE_XBOARD);
+                if(appData.debugMode) {
+                    fprintf(debugFP, "DEBUG: gameMode after GameEnds = %d\n", gameMode);
+                }
+            }
+        }
+        // 检查白方兽穴 (0, 3) - d1
+        if(toY == 0 && toX == 3 && piece != EmptySquare) {
+            if(appData.debugMode) {
+                fprintf(debugFP, "DEBUG: Someone entered white's den!\n");
+                fprintf(debugFP, "DEBUG: gameMode before GameEnds = %d\n", gameMode);
+            }
+            if(!WhiteOnMove(forwardMostMove-1)) {
+                // 黑方刚走完，所以是黑方进入
+                if(appData.debugMode) {
+                    fprintf(debugFP, "DEBUG: BLACK WINS! Calling GameEnds\n");
+                }
+                DisplayInformation("BLACK WINS: Enters white's den!");
+                GameEnds(BlackWins, "Black enters white's den", GE_XBOARD);
+                if(appData.debugMode) {
+                    fprintf(debugFP, "DEBUG: gameMode after GameEnds = %d\n", gameMode);
+                }
+            }
+        }
     }
 }
 
@@ -10834,6 +10907,7 @@ NonStandardBoardSize (VariantClass v, int boardWidth, int boardHeight, int holdi
       if( v == VariantUnknown || *engineVariant) return 0; // engine-defined name never needs prefix
       // correct the deviations default for each variant
       if( v == VariantXiangqi ) width = 9,  height = 10;
+	if( v == VariantJungle )  width = 7,  height = 9;  // 斗兽棋 7x9需要增加斗兽棋的棋盘size,确保可以和测试引擎通信
       if( v == VariantShogi )   width = 9,  height = 9,  holdings = 7;
       if( v == VariantBughouse || v == VariantCrazyhouse) holdings = 5;
       if( v == VariantCapablanca || v == VariantCapaRandom ||
