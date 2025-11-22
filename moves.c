@@ -636,12 +636,22 @@ Sting (Board board, int flags, int rf, int ff, int dy, int dx, MoveCallback call
   legNr -= 2;
 }
 
+/* 斗兽棋河流相关函数的前向声明 */
+static int IsRiverSquare (int row, int col);
+static int HasRatInRiverPath (Board board, int fromRow, int fromCol, int toRow, int toCol);
+static void GenerateRiverJump (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure);
+
 void
 StepForward (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure)
 {
   int ft = ff, rt = rf + 1;
   if (rt >= BOARD_HEIGHT) return;
   if (SameColor(board[rf][ff], board[rt][ft])) return;
+  /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
+  if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
+    ChessSquare piece = board[rf][ff];
+    if (piece != WhitePawn && piece != BlackPawn) return;
+  }
   callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
 }
 
@@ -651,19 +661,128 @@ StepBackward (Board board, int flags, int rf, int ff, MoveCallback callback, VOI
   int ft = ff, rt = rf - 1;
   if (rt < 0) return;
   if (SameColor(board[rf][ff], board[rt][ft])) return;
+  /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
+  if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
+    ChessSquare piece = board[rf][ff];
+    if (piece != WhitePawn && piece != BlackPawn) return;
+  }
   callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+}
+
+/* 斗兽棋河流检查函数 */
+/* 河流区域：行3-5，列1-2和4-5（两片2行×3列的水域） */
+static int
+IsRiverSquare (int row, int col)
+{
+  if (gameInfo.variant != VariantJungle) return 0;
+  /* 河流在行3-5（棋盘中间区域） */
+  if (row >= 3 && row <= 5) {
+    /* 左片河流：列1-2 */
+    if (col >= 1 && col <= 2) return 1;
+    /* 右片河流：列4-5 */
+    if (col >= 4 && col <= 5) return 1;
+  }
+  return 0;
+}
+
+/* 检查狮/虎跳河路径中是否有老鼠阻挡 */
+static int
+HasRatInRiverPath (Board board, int fromRow, int fromCol, int toRow, int toCol)
+{
+  int row, col;
+  int rowStep = (toRow > fromRow) ? 1 : (toRow < fromRow) ? -1 : 0;
+  int colStep = (toCol > fromCol) ? 1 : (toCol < fromCol) ? -1 : 0;
+  
+  /* 检查路径上的每个河流格子 */
+  row = fromRow + rowStep;
+  col = fromCol + colStep;
+  while (IsRiverSquare(row, col)) {
+    /* 如果河流格子里有老鼠（无论敌我），则阻挡 */
+    if (board[row][col] == WhitePawn || board[row][col] == BlackPawn) {
+      return 1;
+    }
+    row += rowStep;
+    col += colStep;
+    /* 如果超出河流区域，跳出循环 */
+    if (!IsRiverSquare(row, col)) break;
+  }
+  return 0;
+}
+
+/* 生成狮/虎的跳河走法 */
+static void
+GenerateRiverJump (Board board, int flags, int rf, int ff, 
+                  MoveCallback callback, VOIDSTAR closure)
+{
+  int rt, ft;
+  int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; /* 上、下、左、右 */
+  int i;
+  
+  /* 检查当前位置是否在河流边缘（陆地，且相邻有河流） */
+  if (IsRiverSquare(rf, ff)) return; /* 不能在河流中跳河 */
+  
+  for (i = 0; i < 4; i++) {
+    int dr = directions[i][0];
+    int dc = directions[i][1];
+    int nextRow = rf + dr;
+    int nextCol = ff + dc;
+    
+    /* 检查相邻格子是否是河流 */
+    if (!IsRiverSquare(nextRow, nextCol)) continue;
+    
+    /* 沿着这个方向找到河流对岸的陆地格子 */
+    rt = nextRow;
+    ft = nextCol;
+    while (IsRiverSquare(rt, ft)) {
+      rt += dr;
+      ft += dc;
+      /* 检查是否超出棋盘 */
+      if (rt < 0 || rt >= BOARD_HEIGHT || ft < BOARD_LEFT || ft >= BOARD_RGHT) break;
+    }
+    
+    /* 如果找到了对岸的陆地格子 */
+    if (rt >= 0 && rt < BOARD_HEIGHT && ft >= BOARD_LEFT && ft < BOARD_RGHT && 
+        !IsRiverSquare(rt, ft)) {
+      /* 检查路径中是否有老鼠阻挡 */
+      if (HasRatInRiverPath(board, rf, ff, rt, ft)) continue;
+      
+      /* 检查目标格子是否是己方棋子 */
+      if (SameColor(board[rf][ff], board[rt][ft])) continue;
+      
+      /* 生成跳河走法 */
+      callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+    }
+  }
 }
 
 void
 StepSideways (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure)
 {
   int ft, rt = rf;
+  ChessSquare piece = board[rf][ff];
+  
   ft = ff + 1;
-  if (!(rt >= BOARD_HEIGHT || ft >= BOARD_RGHT) && !SameColor(board[rf][ff], board[rt][ft]))
+  if (!(rt >= BOARD_HEIGHT || ft >= BOARD_RGHT) && !SameColor(board[rf][ff], board[rt][ft])) {
+    /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
+    if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
+      if (piece == WhitePawn || piece == BlackPawn) {
+        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      }
+    } else {
       callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+    }
+  }
   ft = ff - 1;
-  if (!(rt >= BOARD_HEIGHT || ft < BOARD_LEFT) && !SameColor(board[rf][ff], board[rt][ft]))
+  if (!(rt >= BOARD_HEIGHT || ft < BOARD_LEFT) && !SameColor(board[rf][ff], board[rt][ft])) {
+    /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
+    if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
+      if (piece == WhitePawn || piece == BlackPawn) {
+        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      }
+    } else {
       callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+    }
+  }
 }
 
 void
@@ -1205,9 +1324,9 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 	    case BlackRook:
           		//jungle tiger 还需要增加跳河，吃子等逻辑
           		if(gameInfo.variant == VariantJungle) {
-          			/* 斗兽棋：虎(T)走4个正交方向1格 + 跳河（TODO） */
+          			/* 斗兽棋：虎(T)走4个正交方向1格 + 跳河 */
           			Wazir(board, flags, rf, ff, callback, closure);
-          			// TODO: 添加跳河逻辑
+          			GenerateRiverJump(board, flags, rf, ff, callback, closure);
           			break;
           		}
 
@@ -1339,9 +1458,9 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
             case BlackLion:
 
           		if(gameInfo.variant == VariantJungle) {
-          			/* 斗兽棋：狮(L)走4个正交方向1格 + 跳河（TODO） */
+          			/* 斗兽棋：狮(L)走4个正交方向1格 + 跳河 */
           			Wazir(board, flags, rf, ff, callback, closure);
-          			// TODO: 添加跳河逻辑
+          			GenerateRiverJump(board, flags, rf, ff, callback, closure);
           			break;
           		}
 
