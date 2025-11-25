@@ -640,6 +640,10 @@ Sting (Board board, int flags, int rf, int ff, int dy, int dx, MoveCallback call
 static int IsRiverSquare (int row, int col);
 static int HasRatInRiverPath (Board board, int fromRow, int fromCol, int toRow, int toCol);
 static void GenerateRiverJump (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure);
+/* 斗兽棋吃子规则相关函数的前向声明 */
+static int IsTrapSquare (int row, int col, int side);
+static int GetPieceRank (ChessSquare piece);
+static int CanCaptureJungle (Board board, ChessSquare attacker, ChessSquare defender, int attackerRow, int attackerCol, int defenderRow, int defenderCol);
 
 void
 StepForward (Board board, int flags, int rf, int ff, MoveCallback callback, VOIDSTAR closure)
@@ -651,6 +655,12 @@ StepForward (Board board, int flags, int rf, int ff, MoveCallback callback, VOID
   if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
     ChessSquare piece = board[rf][ff];
     if (piece != WhitePawn && piece != BlackPawn) return;
+  }
+  /* 斗兽棋：检查吃子规则 */
+  if (gameInfo.variant == VariantJungle && board[rt][ft] != EmptySquare) {
+    if (!CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+      return; /* 不能吃子，不允许这个走法 */
+    }
   }
   callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
 }
@@ -665,6 +675,12 @@ StepBackward (Board board, int flags, int rf, int ff, MoveCallback callback, VOI
   if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
     ChessSquare piece = board[rf][ff];
     if (piece != WhitePawn && piece != BlackPawn) return;
+  }
+  /* 斗兽棋：检查吃子规则 */
+  if (gameInfo.variant == VariantJungle && board[rt][ft] != EmptySquare) {
+    if (!CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+      return; /* 不能吃子，不允许这个走法 */
+    }
   }
   callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
 }
@@ -709,6 +725,120 @@ HasRatInRiverPath (Board board, int fromRow, int fromCol, int toRow, int toCol)
   return 0;
 }
 
+/* 检查是否是陷阱格子
+ * side: 0=白方, 1=黑方
+ * 陷阱在对方兽穴相邻的三个格子上（前方及左右方）
+ * 白方兽穴在(0,3)，陷阱在(1,2), (1,3), (1,4)
+ * 黑方兽穴在(8,3)，陷阱在(7,2), (7,3), (7,4)
+ */
+static int
+IsTrapSquare (int row, int col, int side)
+{
+  if (gameInfo.variant != VariantJungle) return 0;
+  if (side == 0) {
+    /* 白方陷阱在行1，列2,3,4 */
+    if (row == 1 && col >= 2 && col <= 4) return 1;
+  } else {
+    /* 黑方陷阱在行7，列2,3,4 */
+    if (row == 7 && col >= 2 && col <= 4) return 1;
+  }
+  return 0;
+}
+
+/* 获取棋子等级
+ * 象(8) > 狮(7) > 虎(6) > 豹(5) > 狼(4) > 狗(3) > 猫(2) > 鼠(1)
+ */
+static int
+GetPieceRank (ChessSquare piece)
+{
+  if (gameInfo.variant != VariantJungle) return 0;
+  
+  switch (piece) {
+    case WhiteQueen:
+    case BlackQueen:
+      return 8;  /* 象 (E) */
+    case WhiteLion:
+    case BlackLion:
+      return 7;  /* 狮 (L) */
+    case WhiteRook:
+    case BlackRook:
+      return 6;  /* 虎 (T) */
+    case WhiteBishop:
+    case BlackBishop:
+      return 5;  /* 豹 (P) */
+    case WhiteWolf:
+    case BlackWolf:
+      return 4;  /* 狼 (W) */
+    case WhiteFalcon:
+    case BlackFalcon:
+      return 3;  /* 狗 (D) */
+    case WhiteCat:
+    case BlackCat:
+      return 2;  /* 猫 (C) */
+    case WhitePawn:
+    case BlackPawn:
+      return 1;  /* 鼠 (R) */
+    default:
+      return 0;
+  }
+}
+
+/* 检查斗兽棋是否可以吃子
+ * 规则：
+ * 1. 基本规则：大吃小（包括同级）
+ * 2. 特殊规则：老鼠可以吃大象，但大象不能吃老鼠
+ * 3. 陷阱效果：进入敌方陷阱的棋子可以被任何敌方棋子吃掉
+ * 4. 水战限制：陆地上的棋子不能吃水中的棋子（除鼠外），水中的鼠不能吃岸上的象
+ */
+static int
+CanCaptureJungle (Board board, ChessSquare attacker, ChessSquare defender, 
+                  int attackerRow, int attackerCol, int defenderRow, int defenderCol)
+{
+  if (gameInfo.variant != VariantJungle) return 1; /* 非斗兽棋变体，使用默认规则 */
+  if (defender == EmptySquare) return 1; /* 目标格子为空，可以移动 */
+  
+  int attackerRank = GetPieceRank(attacker);
+  int defenderRank = GetPieceRank(defender);
+  
+  if (attackerRank == 0 || defenderRank == 0) return 1; /* 不是斗兽棋棋子，使用默认规则 */
+  
+  int attackerInRiver = IsRiverSquare(attackerRow, attackerCol);
+  int defenderInRiver = IsRiverSquare(defenderRow, defenderCol);
+  
+  /* 水战限制：陆地上的棋子不能吃水中的棋子（除鼠外） */
+  if (!attackerInRiver && defenderInRiver) {
+    if (attacker != WhitePawn && attacker != BlackPawn) {
+      return 0; /* 不是老鼠，不能吃水中的棋子 */
+    }
+  }
+  
+  /* 水战限制：水中的鼠不能吃岸上的象 */
+  if (attackerInRiver && (attacker == WhitePawn || attacker == BlackPawn) && !defenderInRiver) {
+    if (defenderRank == 8) { /* 大象 */
+      return 0;
+    }
+  }
+  
+  /* 检查陷阱效果：如果防守方在敌方陷阱中，可以被任何棋子吃掉 */
+  int attackerSide = (attacker < BlackPawn) ? 0 : 1; /* 0=白方, 1=黑方 */
+  if (IsTrapSquare(defenderRow, defenderCol, 1 - attackerSide)) {
+    return 1; /* 敌方陷阱中的棋子可以被任何棋子吃掉 */
+  }
+  
+  /* 特殊规则：老鼠可以吃大象 */
+  if (attackerRank == 1 && defenderRank == 8) {
+    return 1;
+  }
+  
+  /* 特殊规则：大象不能吃老鼠 */
+  if (attackerRank == 8 && defenderRank == 1) {
+    return 0;
+  }
+  
+  /* 基本规则：大吃小（包括同级） */
+  return (attackerRank >= defenderRank);
+}
+
 /* 生成狮/虎的跳河走法 */
 static void
 GenerateRiverJump (Board board, int flags, int rf, int ff, 
@@ -749,6 +879,11 @@ GenerateRiverJump (Board board, int flags, int rf, int ff,
       /* 检查目标格子是否是己方棋子 */
       if (SameColor(board[rf][ff], board[rt][ft])) continue;
       
+      /* 检查是否可以吃子 */
+      if (!CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+        continue;
+      }
+      
       /* 生成跳河走法 */
       callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
     }
@@ -766,10 +901,18 @@ StepSideways (Board board, int flags, int rf, int ff, MoveCallback callback, VOI
     /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
     if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
       if (piece == WhitePawn || piece == BlackPawn) {
-        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+        /* 斗兽棋：检查吃子规则 */
+        if (board[rt][ft] == EmptySquare || 
+            CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+          callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+        }
       }
     } else {
-      callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      /* 斗兽棋：检查吃子规则 */
+      if (board[rt][ft] == EmptySquare || 
+          CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      }
     }
   }
   ft = ff - 1;
@@ -777,10 +920,18 @@ StepSideways (Board board, int flags, int rf, int ff, MoveCallback callback, VOI
     /* 斗兽棋：除了老鼠外，其他棋子不能进入河流 */
     if (gameInfo.variant == VariantJungle && IsRiverSquare(rt, ft)) {
       if (piece == WhitePawn || piece == BlackPawn) {
-        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+        /* 斗兽棋：检查吃子规则 */
+        if (board[rt][ft] == EmptySquare || 
+            CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+          callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+        }
       }
     } else {
-      callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      /* 斗兽棋：检查吃子规则 */
+      if (board[rt][ft] == EmptySquare || 
+          CanCaptureJungle(board, board[rf][ff], board[rt][ft], rf, ff, rt, ft)) {
+        callback(board, flags, NormalMove, rf, ff, rt, ft, closure);
+      }
     }
   }
 }
