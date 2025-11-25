@@ -175,6 +175,173 @@ class JungleTestEngine:
         """判断是否是黑方棋子"""
         return piece and piece.islower()
 
+    def is_river_square(self, rank, file):
+        """检查是否是河流格子"""
+        # 河流区域：行3-5（索引），列1-2和4-5
+        if 3 <= rank <= 5:
+            if 1 <= file <= 2 or 4 <= file <= 5:
+                return True
+        return False
+
+    def is_trap_square(self, rank, file, side):
+        """检查是否是陷阱格子
+        side: 'white' 或 'black'
+        陷阱在对方兽穴相邻的三个格子上（前方及左右方）
+        白方兽穴在(0,3)，陷阱在(1,2), (1,3), (1,4)
+        黑方兽穴在(8,3)，陷阱在(7,2), (7,3), (7,4)
+        """
+        if side == 'white':
+            # 白方陷阱在行1，列2,3,4
+            if rank == 1 and 2 <= file <= 4:
+                return True
+        else:
+            # 黑方陷阱在行7，列2,3,4
+            if rank == 7 and 2 <= file <= 4:
+                return True
+        return False
+
+    def is_den_square(self, rank, file, side):
+        """检查是否是兽穴格子"""
+        if side == 'white':
+            return rank == 0 and file == 3
+        else:
+            return rank == 8 and file == 3
+
+    def get_piece_rank(self, piece):
+        """获取棋子等级
+        象(8) > 狮(7) > 虎(6) > 豹(5) > 狼(4) > 狗(3) > 猫(2) > 鼠(1)
+        """
+        piece_map = {
+            'Q': 8, 'q': 8,  # 象 (Queen/Elephant)
+            'L': 7, 'l': 7,  # 狮 (Lion)
+            'R': 6, 'r': 6,  # 虎 (Rook/Tiger)
+            'B': 5, 'b': 5,  # 豹 (Bishop/Panther)
+            'N': 4, 'n': 4,  # 狼 (Knight/Wolf)
+            'D': 3, 'd': 3,  # 狗 (Falcon/Dog)
+            'C': 2, 'c': 2,  # 猫 (Cat)
+            'P': 1, 'p': 1,  # 鼠 (Pawn/Rat)
+        }
+        return piece_map.get(piece, 0)
+
+    def can_capture(self, attacker, defender, attacker_rank, attacker_file, defender_rank, defender_file, side):
+        """检查是否可以吃子
+        - 基本规则：大吃小
+        - 特殊规则：老鼠可以吃大象，但大象不能吃老鼠
+        - 陷阱效果：进入敌方陷阱的棋子可以被任何敌方棋子吃掉
+        - 水战限制：陆地上的棋子不能吃水中的棋子（除鼠外），水中的鼠不能吃岸上的象
+        """
+        attacker_rank_val = self.get_piece_rank(attacker)
+        defender_rank_val = self.get_piece_rank(defender)
+        
+        attacker_in_river = self.is_river_square(attacker_rank, attacker_file)
+        defender_in_river = self.is_river_square(defender_rank, defender_file)
+        
+        # 水战限制：陆地上的棋子不能吃水中的棋子（除鼠外）
+        if not attacker_in_river and defender_in_river:
+            if attacker not in ['P', 'p']:  # 不是老鼠
+                return False
+        
+        # 水战限制：水中的鼠不能吃岸上的象
+        if attacker_in_river and attacker in ['P', 'p'] and not defender_in_river:
+            if defender_rank_val == 8:  # 大象
+                return False
+        
+        # 检查陷阱效果：如果防守方在敌方陷阱中，可以被任何棋子吃掉
+        if self.is_trap_square(defender_rank, defender_file, 'black' if side == 'white' else 'white'):
+            return True
+        
+        # 特殊规则：老鼠可以吃大象
+        if attacker_rank_val == 1 and defender_rank_val == 8:
+            return True
+        
+        # 特殊规则：大象不能吃老鼠
+        if attacker_rank_val == 8 and defender_rank_val == 1:
+            return False
+        
+        # 基本规则：大吃小（包括同级）
+        return attacker_rank_val >= defender_rank_val
+
+    def has_rat_in_river_path(self, from_rank, from_file, to_rank, to_file):
+        """检查跳河路径中是否有老鼠阻挡"""
+        dr = 1 if to_rank > from_rank else (-1 if to_rank < from_rank else 0)
+        df = 1 if to_file > from_file else (-1 if to_file < from_file else 0)
+        
+        rank = from_rank + dr
+        file = from_file + df
+        
+        while self.is_river_square(rank, file):
+            piece = self.board[rank][file]
+            if piece in ['P', 'p']:  # 有老鼠阻挡
+                return True
+            rank += dr
+            file += df
+            if not (0 <= rank < 9 and 0 <= file < 7):
+                break
+        return False
+
+    def generate_river_jump_moves(self, rank, file, piece, side):
+        """生成狮子和老虎的跳河走法"""
+        moves = []
+        
+        # 只有狮子和老虎可以跳河
+        if piece not in ['L', 'l', 'R', 'r']:
+            return moves
+        
+        # 不能在河流中跳河
+        if self.is_river_square(rank, file):
+            return moves
+        
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 上、下、左、右
+        
+        for dr, df in directions:
+            next_rank = rank + dr
+            next_file = file + df
+            
+            # 检查相邻格子是否是河流
+            if not (0 <= next_rank < 9 and 0 <= next_file < 7):
+                continue
+            if not self.is_river_square(next_rank, next_file):
+                continue
+            
+            # 沿着这个方向找到河流对岸的陆地格子
+            to_rank = next_rank
+            to_file = next_file
+            while self.is_river_square(to_rank, to_file):
+                to_rank += dr
+                to_file += df
+                if not (0 <= to_rank < 9 and 0 <= to_file < 7):
+                    break
+            
+            # 如果找到了对岸的陆地格子
+            if 0 <= to_rank < 9 and 0 <= to_file < 7 and not self.is_river_square(to_rank, to_file):
+                # 检查路径中是否有老鼠阻挡
+                if self.has_rat_in_river_path(rank, file, to_rank, to_file):
+                    continue
+                
+                target = self.board[to_rank][to_file]
+                
+                # 不能跳到己方棋子
+                if target:
+                    if side == 'white' and self.is_white_piece(target):
+                        continue
+                    if side == 'black' and self.is_black_piece(target):
+                        continue
+                    
+                    # 检查是否可以吃子
+                    if not self.can_capture(piece, target, rank, file, to_rank, to_file, side):
+                        continue
+                
+                # 不能进入己方兽穴
+                if self.is_den_square(to_rank, to_file, side):
+                    continue
+                
+                from_square = chr(ord('a') + file) + str(rank + 1)
+                to_square = chr(ord('a') + to_file) + str(to_rank + 1)
+                move = from_square + to_square
+                moves.append(move)
+        
+        return moves
+
     def generate_legal_moves(self):
         """生成所有合法走法"""
         moves = []
@@ -191,8 +358,7 @@ class JungleTestEngine:
                 if self.side_to_move == 'black' and not self.is_black_piece(piece):
                     continue
 
-                # 生成该棋子的所有可能走法
-                # 简化版：只考虑上下左右移动一格
+                # 生成基本移动（上下左右一格）
                 directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
                 for dr, df in directions:
@@ -211,12 +377,29 @@ class JungleTestEngine:
                             continue
                         if self.side_to_move == 'black' and self.is_black_piece(target):
                             continue
+                        
+                        # 检查是否可以吃子
+                        if not self.can_capture(piece, target, rank, file, new_rank, new_file, self.side_to_move):
+                            continue
+
+                    # 河流限制：除了老鼠外，其他棋子不能进入河流
+                    if self.is_river_square(new_rank, new_file):
+                        if piece not in ['P', 'p']:  # 不是老鼠
+                            continue
+
+                    # 不能进入己方兽穴
+                    if self.is_den_square(new_rank, new_file, self.side_to_move):
+                        continue
 
                     # 构造走法字符串
                     from_square = chr(ord('a') + file) + str(rank + 1)
                     to_square = chr(ord('a') + new_file) + str(new_rank + 1)
                     move = from_square + to_square
                     moves.append(move)
+
+                # 生成跳河走法（狮子和老虎）
+                river_jump_moves = self.generate_river_jump_moves(rank, file, piece, self.side_to_move)
+                moves.extend(river_jump_moves)
 
         return moves
 
