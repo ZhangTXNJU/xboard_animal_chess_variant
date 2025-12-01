@@ -736,11 +736,11 @@ IsTrapSquare (int row, int col, int side)
 {
   if (gameInfo.variant != VariantJungle) return 0;
   if (side == 0) {
-    /* 白方陷阱在行1，列2,3,4 */
-    if (row == 1 && col >= 2 && col <= 4) return 1;
+    /* 白方陷阱：位于白方兽穴(0,3)的左、右以及前方一格 */
+    if ((row == 0 && (col == 2 || col == 4)) || (row == 1 && col == 3)) return 1;
   } else {
-    /* 黑方陷阱在行7，列2,3,4 */
-    if (row == 7 && col >= 2 && col <= 4) return 1;
+    /* 黑方陷阱：位于黑方兽穴(BOARD_HEIGHT-1,3)的左、右以及前方一格 */
+    if ((row == BOARD_HEIGHT-1 && (col == 2 || col == 4)) || (row == BOARD_HEIGHT-2 && col == 3)) return 1;
   }
   return 0;
 }

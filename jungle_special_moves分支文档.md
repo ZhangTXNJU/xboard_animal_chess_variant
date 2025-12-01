@@ -117,3 +117,13 @@ GenerateRiverJump() (moves.c:812-860)
 走法生成修改：moves.c:644-658 (StepForward), moves.c:660-674 (StepBackward), moves.c:758-800 (StepSideways)
 跳河吃子检查：moves.c:847-850 (GenerateRiverJump)
 代码已通过编译检查，无语法错误。吃子规则已集成到走法生成中，确保只生成合法的吃子走法。
+ 
+
+总结：
+
+实现胜负判断（当一方棋子进入对方兽穴对局结束）
+实现了斗兽棋的特殊吃子规则，包括棋子大小关系、象鼠反转、陷阱效果和水战限制。
+完成一个测试引擎，随即生成一些合法的走法
+
+
+
